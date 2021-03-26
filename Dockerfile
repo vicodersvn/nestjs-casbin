@@ -20,8 +20,6 @@ COPY . .
 
 RUN yarn build
 
-RUN yarn db:seed
-
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 CMD ["supervisord"]
