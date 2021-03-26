@@ -6,7 +6,10 @@ import { Auth } from '../../decorators/auth.decorator';
 import { RoleTransformer } from '../../transformers/role.transformer';
 import { Request } from 'express';
 import { assign } from 'lodash';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Roles')
+@ApiBearerAuth()
 @Controller('api/v1/roles')
 export class RoleController {
   constructor(private response: ApiResponseService, private roleService: RoleService) {}

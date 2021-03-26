@@ -15,9 +15,6 @@ export class Permission {
   })
   slug: string;
 
-  @Column()
-  permission_group_id: number;
-
   @DeleteDateColumn({ type: 'timestamp' })
   public deleted_at: Date;
 

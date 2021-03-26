@@ -1,11 +1,9 @@
-import { DynamicModule, Module, Provider } from '@nestjs/common';
+import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
 import { CasbinService } from './services/casbin.service';
-import { ConnectionOptions } from 'typeorm';
 import { CASBIN_ENFORCER } from './casbin.constants';
-import { Adapter, Enforcer } from 'casbin';
-import TypeORMAdapter from 'typeorm-adapter';
 import { CasbinAsyncOptions } from './casbin.option.interface';
 
+@Global()
 @Module({})
 export class CasbinModule {
   public static forRootAsync(options: CasbinAsyncOptions): DynamicModule {
