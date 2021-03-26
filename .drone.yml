@@ -16,6 +16,8 @@ steps:
     volumes:
       - name: cache
         path: /cache
+      - name: dhost
+        path: /var/run/docker.sock
   - name: env
     image: nightfuryest/drone-plugin-secret-to-env
     settings:
