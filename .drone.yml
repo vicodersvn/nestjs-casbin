@@ -1,0 +1,74 @@
+---
+kind: pipeline
+type: docker
+name: default
+globals:
+  - &docker_creds
+    username:
+      from_secret: docker_user
+    password:
+      from_secret: docker_password
+steps:
+  - name: prepare
+    image: busybox
+    commands:
+      - mkdir -p /cache/${DRONE_REPO}/docker
+    volumes:
+      - name: cache
+        path: /cache
+  - name: env
+    image: nightfuryest/drone-plugin-secret-to-env
+    settings:
+      template: .deploy/.env.prod.template
+      file: .env
+      envs:
+        - APP_KEY
+      APP_KEY:
+        from_secret: APP_KEY
+  - name: Install Packages
+    image: node:14-alpine
+    commands:
+      - node -v
+      - npm -v
+      - yarn --version
+      - yarn config set cache-folder /yarn
+      - yarn install --pure-lockfile --production=false
+    volumes:
+      - name: yarn
+        path: /yarn
+      - name: dhost
+        path: /var/run/docker.sock
+  - name: build
+    image: plugins/docker
+    settings:
+      registry: docker-registry.vicoders.com
+      repo: docker-registry.vicoders.com/nestjs_starter
+      tags:
+        - latest
+        - ${DRONE_COMMIT_BRANCH}
+      create_repository: true
+      use_cache: true
+      <<: *docker_creds
+    volumes:
+      - name: docker
+        path: /var/lib/docker
+      - name: dhost
+        path: /var/run/docker.sock
+volumes:
+  - name: cache
+    host:
+      path: /var/cache
+  - name: docker
+    host:
+      path: /var/cache/${DRONE_REPO}/docker
+  - name: dhost
+    host:
+      path: /var/run/docker.sock
+  - name: yarn
+    host:
+      path: /var/cache/${DRONE_REPO}/yarn
+
+trigger:
+  branch:
+    - production
+    - master
