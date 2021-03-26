@@ -60,12 +60,4 @@ export class RoleController {
     await this.roleService.destroy(id);
     return { data: 'success' };
   }
-
-  @Put(':id/save-permissions')
-  @Auth('admin')
-  async savePermission(@Param('id', ParseIntPipe) id: number, @Req() request: Request): Promise<any> {
-    const data = (request as any).body;
-    const result = await this.roleService.savePermissionsToRole(id, data.permission_ids);
-    return result;
-  }
 }

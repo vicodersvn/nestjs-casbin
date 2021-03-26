@@ -7,7 +7,11 @@ import { ComponentsModule } from './components/components.module';
 import validationSchema from '../config/validationSchema';
 import configuration from '../config/configuration';
 import { SharedModule } from './shared/shared.module';
-
+import { CasbinModule } from './casbin/casbin.module';
+import TypeORMAdapter from 'typeorm-adapter';
+import { Adapter, Enforcer } from 'casbin';
+import * as path from 'path';
+import * as pick from 'lodash/pick';
 @Module({
   imports: [
     SharedModule,
@@ -23,6 +27,20 @@ import { SharedModule } from './shared/shared.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => config.get('database'),
+      inject: [ConfigService],
+    }),
+    CasbinModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (config: ConfigService) => {
+        const adapter = await TypeORMAdapter.newAdapter({
+          ...pick(config.get('database'), ['type', 'host', 'port', 'username', 'password', 'database']),
+          ...{ dropSchema: false },
+        });
+        const enforcer = await new Enforcer();
+        enforcer.initWithAdapter(path.resolve(process.cwd(), 'src/casbin/rbac_model.conf'), (adapter as any) as Adapter);
+        await enforcer.loadPolicy();
+        return enforcer;
+      },
       inject: [ConfigService],
     }),
     ComponentsModule,

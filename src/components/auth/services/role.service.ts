@@ -14,19 +14,4 @@ export class RoleService extends BaseService {
     super();
     this.repository = this.connection.getRepository(this.entity);
   }
-  async savePermissionsToRole(id: number | string, permission_ids: []): Promise<any> {
-    let permissions = [];
-    if (!isEmpty(permission_ids)) {
-      permissions = await this.connection
-        .getRepository(Permission)
-        .createQueryBuilder('permission')
-        .where('permission.id IN (:...permission_ids)', {
-          permission_ids: permission_ids,
-        })
-        .getMany();
-    }
-    const role = await this.connection.getRepository(Role).createQueryBuilder('role').where('role.id = :id', { id: id }).getOne();
-    role.permissions = permissions;
-    return await this.connection.manager.save(role);
-  }
 }
